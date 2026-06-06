@@ -21,6 +21,7 @@
     "@types/cors": "^2.8.19",
     "@types/jsonwebtoken": "^9.0.10",
     "bcryptjs": "^3.0.2",
+    "class-validator": "^0.15.1",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "graphql": "^16.11.0",
