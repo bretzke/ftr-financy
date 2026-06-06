@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: financy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: financy
+      POSTGRES_PASSWORD: financy
+      POSTGRES_DB: financy
+    ports:
+      - "5432:5432"
+    volumes:
+      - financy_pg_data:/var/lib/postgresql/data
+
+volumes:
+  financy_pg_data:
