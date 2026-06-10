@@ -1,0 +1,86 @@
+export const TransactionType = {
+  INCOME: 'INCOME',
+  EXPENSE: 'EXPENSE',
+} as const
+
+export type TransactionType =
+  (typeof TransactionType)[keyof typeof TransactionType]
+
+export interface User {
+  id: string
+  name: string
+  email: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Category {
+  id: string
+  name: string
+  description?: string | null
+  icon: string
+  color: string
+  userId: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface Transaction {
+  id: string
+  title: string
+  amount: number
+  type: TransactionType
+  date: string
+  categoryId: string
+  userId: string
+  category?: Category | null
+  createdAt: string
+  updatedAt: string
+}
+
+export interface AuthPayload {
+  token: string
+  refreshToken: string
+  user: User
+}
+
+export interface LoginInput {
+  email: string
+  password: string
+}
+
+export interface RegisterInput {
+  name: string
+  email: string
+  password: string
+}
+
+export interface CreateTransactionInput {
+  title: string
+  amount: number
+  type: TransactionType
+  date: string
+  categoryId: string
+}
+
+export interface UpdateTransactionInput {
+  title?: string
+  amount?: number
+  type?: TransactionType
+  date?: string
+  categoryId?: string
+}
+
+export interface CreateCategoryInput {
+  name: string
+  description?: string | null
+  icon: string
+  color: string
+}
+
+export interface UpdateCategoryInput {
+  name?: string
+  description?: string | null
+  icon?: string
+  color?: string
+}
