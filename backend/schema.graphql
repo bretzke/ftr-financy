@@ -37,6 +37,7 @@ enum CategoryIcon {
 type CategoryModel {
   color: CategoryColor!
   createdAt: DateTimeISO!
+  description: String
   icon: CategoryIcon!
   id: ID!
   name: String!
@@ -47,6 +48,7 @@ type CategoryModel {
 
 input CreateCategoryInput {
   color: CategoryColor!
+  description: String
   icon: CategoryIcon!
   name: String!
 }
@@ -127,6 +129,7 @@ enum TransactionType {
 
 input UpdateCategoryInput {
   color: CategoryColor
+  description: String
   icon: CategoryIcon
   name: String
 }

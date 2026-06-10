@@ -14,6 +14,7 @@ export class CategoryService {
   private mapCategory(category: {
     id: string
     name: string
+    description: string | null
     icon: string
     color: string
     userId: string
@@ -34,9 +35,12 @@ export class CategoryService {
       'name'
     )
 
+    const description = data.description?.trim() || null
+
     const category = await prismaClient.category.create({
       data: {
         name,
+        description,
         icon: data.icon,
         color: data.color,
         userId,
@@ -71,7 +75,12 @@ export class CategoryService {
     userId: string
   ) {
     const categoryId = assertNotEmpty(id, 'id')
-    assertAtLeastOneField({ name: data.name, icon: data.icon, color: data.color })
+    assertAtLeastOneField({
+      name: data.name,
+      description: data.description,
+      icon: data.icon,
+      color: data.color,
+    })
 
     const category = await prismaClient.category.findFirst({
       where: { id: categoryId, userId },
@@ -82,10 +91,14 @@ export class CategoryService {
       data.name !== undefined
         ? assertMinLength(assertNotEmpty(data.name, 'name'), 2, 'name')
         : undefined
+    const description =
+      data.description !== undefined
+        ? data.description.trim() || null
+        : undefined
 
     const updated = await prismaClient.category.update({
       where: { id: categoryId },
-      data: { name, icon: data.icon, color: data.color },
+      data: { name, description, icon: data.icon, color: data.color },
     })
 
     return this.mapCategory(updated)

@@ -6,6 +6,9 @@ export class CreateCategoryInput {
   @Field(() => String)
   name!: string
 
+  @Field(() => String, { nullable: true })
+  description?: string
+
   @Field(() => CategoryIcon)
   icon!: CategoryIcon
 
@@ -17,6 +20,9 @@ export class CreateCategoryInput {
 export class UpdateCategoryInput {
   @Field(() => String, { nullable: true })
   name?: string
+
+  @Field(() => String, { nullable: true })
+  description?: string
 
   @Field(() => CategoryIcon, { nullable: true })
   icon?: CategoryIcon
