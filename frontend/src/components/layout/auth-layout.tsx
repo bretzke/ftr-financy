@@ -3,7 +3,7 @@ import { Brand } from "../brand";
 
 export function AuthLayout() {
   return (
-    <div className="my-12 flex flex-col items-center">
+    <div className="mt-12 flex flex-col items-center gap-8">
       <header>
         <Brand size="medium" />
       </header>

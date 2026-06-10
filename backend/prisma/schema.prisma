@@ -12,6 +12,35 @@ enum TransactionType {
   EXPENSE
 }
 
+enum CategoryIcon {
+  BUSINESS
+  CAR
+  HEALTH
+  FINANCY
+  CART
+  TICKET
+  TOOL_CASE
+  UTENSILS
+  PET
+  HOUSE
+  GIFT
+  GYM
+  BOOK
+  BAGGAGE
+  MAILBOX
+  RECEIPT
+}
+
+enum CategoryColor {
+  GREEN
+  BLUE
+  PURPLE
+  PINK
+  RED
+  ORANGE
+  YELLOW
+}
+
 model User {
   id           String        @id @default(uuid())
   name         String
@@ -21,11 +50,15 @@ model User {
   updatedAt    DateTime      @updatedAt
   categories   Category[]
   transactions Transaction[]
+
+  @@map("users")
 }
 
 model Category {
   id           String        @id @default(uuid())
   name         String
+  icon         CategoryIcon  @default(FINANCY)
+  color        CategoryColor @default(GREEN)
   userId       String
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
@@ -33,6 +66,7 @@ model Category {
   updatedAt    DateTime      @updatedAt
 
   @@unique([userId, name])
+  @@map("categories")
 }
 
 model Transaction {
@@ -47,4 +81,6 @@ model Transaction {
   user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @updatedAt
+
+  @@map("transactions")
 }

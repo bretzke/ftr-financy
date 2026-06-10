@@ -3,8 +3,41 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+"""Available category colors"""
+enum CategoryColor {
+  BLUE
+  GREEN
+  ORANGE
+  PINK
+  PURPLE
+  RED
+  YELLOW
+}
+
+"""Available category icons"""
+enum CategoryIcon {
+  BAGGAGE
+  BOOK
+  BUSINESS
+  CAR
+  CART
+  FINANCY
+  GIFT
+  GYM
+  HEALTH
+  HOUSE
+  MAILBOX
+  PET
+  RECEIPT
+  TICKET
+  TOOL_CASE
+  UTENSILS
+}
+
 type CategoryModel {
+  color: CategoryColor!
   createdAt: DateTimeISO!
+  icon: CategoryIcon!
   id: ID!
   name: String!
   transactions: [TransactionModel!]!
@@ -13,6 +46,8 @@ type CategoryModel {
 }
 
 input CreateCategoryInput {
+  color: CategoryColor!
+  icon: CategoryIcon!
   name: String!
 }
 
@@ -91,6 +126,8 @@ enum TransactionType {
 }
 
 input UpdateCategoryInput {
+  color: CategoryColor
+  icon: CategoryIcon
   name: String
 }
 

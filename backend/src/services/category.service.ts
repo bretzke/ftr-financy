@@ -3,6 +3,7 @@ import {
   CreateCategoryInput,
   UpdateCategoryInput,
 } from '../dtos/input/category.input'
+import { CategoryColor, CategoryIcon } from '../models/category.model'
 import {
   assertAtLeastOneField,
   assertMinLength,
@@ -10,6 +11,22 @@ import {
 } from '../utils/validation'
 
 export class CategoryService {
+  private mapCategory(category: {
+    id: string
+    name: string
+    icon: string
+    color: string
+    userId: string
+    createdAt: Date
+    updatedAt: Date
+  }) {
+    return {
+      ...category,
+      icon: category.icon as CategoryIcon,
+      color: category.color as CategoryColor,
+    }
+  }
+
   async createCategory(data: CreateCategoryInput, userId: string) {
     const name = assertMinLength(
       assertNotEmpty(data.name, 'name'),
@@ -17,19 +34,25 @@ export class CategoryService {
       'name'
     )
 
-    return prismaClient.category.create({
+    const category = await prismaClient.category.create({
       data: {
         name,
+        icon: data.icon,
+        color: data.color,
         userId,
       },
     })
+
+    return this.mapCategory(category)
   }
 
   async listCategories(userId: string) {
-    return prismaClient.category.findMany({
+    const categories = await prismaClient.category.findMany({
       where: { userId },
       orderBy: { name: 'asc' },
     })
+
+    return categories.map((category) => this.mapCategory(category))
   }
 
   async getCategory(id: string, userId: string) {
@@ -39,7 +62,7 @@ export class CategoryService {
       where: { id: categoryId, userId },
     })
     if (!category) throw new Error('Category not found')
-    return category
+    return this.mapCategory(category)
   }
 
   async updateCategory(
@@ -48,7 +71,7 @@ export class CategoryService {
     userId: string
   ) {
     const categoryId = assertNotEmpty(id, 'id')
-    assertAtLeastOneField({ name: data.name })
+    assertAtLeastOneField({ name: data.name, icon: data.icon, color: data.color })
 
     const category = await prismaClient.category.findFirst({
       where: { id: categoryId, userId },
@@ -60,10 +83,12 @@ export class CategoryService {
         ? assertMinLength(assertNotEmpty(data.name, 'name'), 2, 'name')
         : undefined
 
-    return prismaClient.category.update({
+    const updated = await prismaClient.category.update({
       where: { id: categoryId },
-      data: { name },
+      data: { name, icon: data.icon, color: data.color },
     })
+
+    return this.mapCategory(updated)
   }
 
   async deleteCategory(id: string, userId: string) {

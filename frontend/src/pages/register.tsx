@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { loginSchema, type LoginFormValues } from "@/lib/schemas";
+import { registerSchema, type RegisterFormValues } from "@/lib/schemas";
 import { getErrorMessage } from "@/lib/error";
 import {
   Card,
@@ -21,35 +21,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { AuthFooter } from "@/components/auth-footer";
+import { FieldDescription } from "@/components/ui/field";
 
-export function LoginPage() {
-  const { login } = useAuth();
+export function RegisterPage() {
+  const { register } = useAuth();
   const navigate = useNavigate();
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: "", email: "", password: "" },
   });
 
-  async function onSubmit(values: LoginFormValues) {
+  async function onSubmit(values: RegisterFormValues) {
     try {
-      await login(values);
-      toast.success("Bem-vindo de volta!");
+      await register(values);
+      toast.success("Conta criada com sucesso!");
       navigate("/dashboard", { replace: true });
     } catch (error) {
-      toast.error(getErrorMessage(error, "Não foi possível fazer login"));
+      toast.error(getErrorMessage(error, "Não foi possível criar a conta"));
     }
   }
 
   return (
     <Card className="min-w-[448px] p-8 flex flex-col gap-6">
       <CardHeader className="text-center flex flex-col gap-1 mb-2">
-        <CardTitle className="font-bold text-xl">Fazer login</CardTitle>
+        <CardTitle className="font-bold text-xl">Criar conta</CardTitle>
         <CardDescription className="text-md">
-          Entre na sua conta para continuar
+          Comece a controlar suas finanças ainda hoje
         </CardDescription>
       </CardHeader>
 
@@ -59,6 +58,24 @@ export function LoginPage() {
           className="grid gap-4"
           noValidate
         >
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Seu nome completo"
+                    autoComplete="name"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="email"
@@ -88,39 +105,30 @@ export function LoginPage() {
                   <Input
                     type="password"
                     placeholder="Digite sua senha"
-                    autoComplete="current-password"
+                    autoComplete="new-password"
                     {...field}
                   />
                 </FormControl>
+                <FieldDescription>
+                  A senha deve ter no mínimo 8 caracteres
+                </FieldDescription>
+
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          <div className="flex justify-between items-center gap-4">
-            <div className="flex gap-2">
-              <Checkbox id="remember" />
-              <Label htmlFor="remember" className="font-normal">
-                Lembrar-me
-              </Label>
-            </div>
-
-            <a href="#" className="text-sm text-primary">
-              Recuperar senha
-            </a>
-          </div>
 
           <Button
             type="submit"
             className="mt-2 w-full"
             disabled={form.formState.isSubmitting}
           >
-            Entrar
+            Criar conta
           </Button>
         </form>
       </Form>
 
-      <AuthFooter action="register" />
+      <AuthFooter action="login" />
     </Card>
   );
 }
