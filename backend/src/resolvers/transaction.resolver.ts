@@ -12,8 +12,13 @@ import { CategoryModel } from '../models/category.model'
 import { UserModel } from '../models/user.model'
 import {
   CreateTransactionInput,
+  ListTransactionsInput,
   UpdateTransactionInput,
 } from '../dtos/input/transaction.input'
+import {
+  PaginatedTransactions,
+  TransactionPeriod,
+} from '../dtos/output/transaction.output'
 import { TransactionService } from '../services/transaction.service'
 import { CategoryService } from '../services/category.service'
 import { GqlUser } from '../graphql/decorators/user.decorator'
@@ -52,11 +57,20 @@ export class TransactionResolver {
     return true
   }
 
-  @Query(() => [TransactionModel])
+  @Query(() => PaginatedTransactions)
   async listTransactions(
+    @Arg('params', () => ListTransactionsInput, { nullable: true })
+    params: ListTransactionsInput,
     @GqlUser() user: UserModel
-  ): Promise<TransactionModel[]> {
-    return this.transactionService.listTransactions(user.id)
+  ): Promise<PaginatedTransactions> {
+    return this.transactionService.listTransactions(user.id, params)
+  }
+
+  @Query(() => [TransactionPeriod])
+  async transactionPeriods(
+    @GqlUser() user: UserModel
+  ): Promise<TransactionPeriod[]> {
+    return this.transactionService.listPeriods(user.id)
   }
 
   @Query(() => TransactionModel)

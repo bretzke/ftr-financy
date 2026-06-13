@@ -25,6 +25,14 @@ export function toDateInputValue(value: string | Date) {
   return local.toISOString().slice(0, 10);
 }
 
+export function formatPeriodLabel(month: number, year: number) {
+  const label = new Date(year, month - 1, 1).toLocaleDateString("pt-BR", {
+    month: "long",
+    year: "numeric",
+  });
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
 export function getInitials(name: string) {
   return name
     .trim()

@@ -42,6 +42,7 @@ type CategoryModel {
   id: ID!
   name: String!
   transactions: [TransactionModel!]!
+  transactionsCount: Int!
   updatedAt: DateTimeISO!
   userId: String!
 }
@@ -66,6 +67,16 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTimeISO
 
+input ListTransactionsInput {
+  categoryId: String
+  month: Int
+  page: Int = 1
+  pageSize: Int = 10
+  search: String
+  type: TransactionType
+  year: Int
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -88,11 +99,20 @@ type Mutation {
   updateTransaction(data: UpdateTransactionInput!, id: String!): TransactionModel!
 }
 
+type PaginatedTransactions {
+  items: [TransactionModel!]!
+  page: Int!
+  pageSize: Int!
+  total: Int!
+  totalPages: Int!
+}
+
 type Query {
   getCategory(id: String!): CategoryModel!
   getTransaction(id: String!): TransactionModel!
   listCategories: [CategoryModel!]!
-  listTransactions: [TransactionModel!]!
+  listTransactions(params: ListTransactionsInput): PaginatedTransactions!
+  transactionPeriods: [TransactionPeriod!]!
 }
 
 input RegisterInput {
@@ -119,6 +139,11 @@ type TransactionModel {
   updatedAt: DateTimeISO!
   user: UserModel
   userId: String!
+}
+
+type TransactionPeriod {
+  month: Int!
+  year: Int!
 }
 
 """Transaction type"""

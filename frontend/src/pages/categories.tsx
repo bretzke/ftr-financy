@@ -3,7 +3,6 @@ import { MoreHorizontal, Pencil, Plus, Tags, Trash2 } from "lucide-react";
 import { CategoryIcon } from "@/components/category-icon";
 import { toast } from "sonner";
 import { useCategories, useDeleteCategory } from "@/hooks/use-categories";
-import { useTransactions } from "@/hooks/use-transactions";
 import { PageHeader } from "@/components/page-header";
 import { CategoryDialog } from "@/components/category-dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
@@ -22,19 +21,11 @@ import { CategoryColor } from "@/components/category-color";
 
 export function CategoriesPage() {
   const { data: categories = [], isLoading } = useCategories();
-  const { data: transactions = [] } = useTransactions();
   const deleteCategory = useDeleteCategory();
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<Category | null>(null);
   const [toDelete, setToDelete] = React.useState<Category | null>(null);
-
-  const countByCategory = React.useMemo(() => {
-    return transactions.reduce<Record<string, number>>((acc, transaction) => {
-      acc[transaction.categoryId] = (acc[transaction.categoryId] ?? 0) + 1;
-      return acc;
-    }, {});
-  }, [transactions]);
 
   function handleCreate() {
     setSelected(null);
@@ -128,8 +119,8 @@ export function CategoriesPage() {
                 <div className="w-full flex justify-between items-center">
                   <CategoryColor color={category.color} label={category.name} />
                   <p className="text-sm text-muted-foreground">
-                    {countByCategory[category.id] ?? 0}{" "}
-                    {(countByCategory[category.id] ?? 0) === 1
+                    {category.transactionsCount ?? 0}{" "}
+                    {(category.transactionsCount ?? 0) === 1
                       ? "item"
                       : "itens"}
                   </p>

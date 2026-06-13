@@ -20,6 +20,7 @@ export interface Category {
   description?: string | null
   icon: string
   color: string
+  transactionsCount?: number
   userId: string
   createdAt: string
   updatedAt: string
@@ -69,6 +70,29 @@ export interface UpdateTransactionInput {
   type?: TransactionType
   date?: string
   categoryId?: string
+}
+
+export interface ListTransactionsInput {
+  page?: number
+  pageSize?: number
+  search?: string
+  type?: TransactionType
+  categoryId?: string
+  month?: number
+  year?: number
+}
+
+export interface TransactionPeriod {
+  month: number
+  year: number
+}
+
+export interface PaginatedTransactions {
+  items: Transaction[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
 }
 
 export interface CreateCategoryInput {

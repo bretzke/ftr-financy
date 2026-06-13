@@ -5,9 +5,12 @@ import type {
   Category,
   CreateCategoryInput,
   CreateTransactionInput,
+  ListTransactionsInput,
   LoginInput,
+  PaginatedTransactions,
   RegisterInput,
   Transaction,
+  TransactionPeriod,
   UpdateCategoryInput,
   UpdateTransactionInput,
 } from './types'
@@ -29,6 +32,7 @@ const CATEGORY_FIELDS = gql`
     description
     icon
     color
+    transactionsCount
     userId
     createdAt
     updatedAt
@@ -83,9 +87,24 @@ const REGISTER_MUTATION = gql`
 
 const LIST_TRANSACTIONS_QUERY = gql`
   ${TRANSACTION_FIELDS}
-  query ListTransactions {
-    listTransactions {
-      ...TransactionFields
+  query ListTransactions($params: ListTransactionsInput) {
+    listTransactions(params: $params) {
+      items {
+        ...TransactionFields
+      }
+      total
+      page
+      pageSize
+      totalPages
+    }
+  }
+`
+
+const TRANSACTION_PERIODS_QUERY = gql`
+  query TransactionPeriods {
+    transactionPeriods {
+      month
+      year
     }
   }
 `
@@ -158,10 +177,20 @@ export const api = {
       .request<{ register: AuthPayload }>(REGISTER_MUTATION, { data })
       .then((res) => res.register)
   },
-  listTransactions() {
+  listTransactions(params?: ListTransactionsInput) {
     return graphqlClient
-      .request<{ listTransactions: Transaction[] }>(LIST_TRANSACTIONS_QUERY)
+      .request<{ listTransactions: PaginatedTransactions }>(
+        LIST_TRANSACTIONS_QUERY,
+        { params }
+      )
       .then((res) => res.listTransactions)
+  },
+  listTransactionPeriods() {
+    return graphqlClient
+      .request<{ transactionPeriods: TransactionPeriod[] }>(
+        TRANSACTION_PERIODS_QUERY
+      )
+      .then((res) => res.transactionPeriods)
   },
   createTransaction(data: CreateTransactionInput) {
     return graphqlClient

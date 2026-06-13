@@ -1,5 +1,6 @@
-import { Field, Float, GraphQLISODateTime, InputType } from 'type-graphql'
+import { Field, Float, GraphQLISODateTime, InputType, Int } from 'type-graphql'
 import { TransactionType } from '../../models/transaction.model'
+import { PaginationInput } from './pagination.input'
 
 @InputType()
 export class CreateTransactionInput {
@@ -17,6 +18,24 @@ export class CreateTransactionInput {
 
   @Field(() => String)
   categoryId!: string
+}
+
+@InputType()
+export class ListTransactionsInput extends PaginationInput {
+  @Field(() => String, { nullable: true })
+  search?: string
+
+  @Field(() => TransactionType, { nullable: true })
+  type?: TransactionType
+
+  @Field(() => String, { nullable: true })
+  categoryId?: string
+
+  @Field(() => Int, { nullable: true })
+  month?: number
+
+  @Field(() => Int, { nullable: true })
+  year?: number
 }
 
 @InputType()

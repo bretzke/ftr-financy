@@ -1,53 +1,66 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { api } from '@/graphql/operations'
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { api } from "@/graphql/operations";
 import type {
   CreateTransactionInput,
+  ListTransactionsInput,
   UpdateTransactionInput,
-} from '@/graphql/types'
+} from "@/graphql/types";
 
 export const transactionKeys = {
-  all: ['transactions'] as const,
+  all: ["transactions"] as const,
+  list: (params?: ListTransactionsInput) =>
+    [...transactionKeys.all, "list", params ?? {}] as const,
+  periods: () => [...transactionKeys.all, "periods"] as const,
+};
+
+export function useTransactions(params?: ListTransactionsInput) {
+  return useQuery({
+    queryKey: transactionKeys.list(params),
+    queryFn: () => api.listTransactions(params),
+    placeholderData: keepPreviousData,
+  });
 }
 
-export function useTransactions() {
+export function useTransactionPeriods() {
   return useQuery({
-    queryKey: transactionKeys.all,
-    queryFn: () => api.listTransactions(),
-  })
+    queryKey: transactionKeys.periods(),
+    queryFn: () => api.listTransactionPeriods(),
+  });
 }
 
 export function useCreateTransaction() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateTransactionInput) => api.createTransaction(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all });
     },
-  })
+  });
 }
 
 export function useUpdateTransaction() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string
-      data: UpdateTransactionInput
-    }) => api.updateTransaction(id, data),
+    mutationFn: ({ id, data }: { id: string; data: UpdateTransactionInput }) =>
+      api.updateTransaction(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all });
     },
-  })
+  });
 }
 
 export function useDeleteTransaction() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => api.deleteTransaction(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all });
     },
-  })
+  });
 }
+

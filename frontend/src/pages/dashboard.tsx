@@ -8,7 +8,10 @@ import { cn } from "@/lib/utils";
 import { TransactionType } from "@/graphql/types";
 
 export function DashboardPage() {
-  const { data: transactions = [], isLoading } = useTransactions();
+  const { data, isLoading } = useTransactions({
+    pageSize: 1000,
+  });
+  const transactions = data?.items ?? [];
 
   const totals = React.useMemo(() => {
     return transactions.reduce(

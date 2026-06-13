@@ -1,6 +1,7 @@
 import {
   Arg,
   FieldResolver,
+  Int,
   Mutation,
   Query,
   Resolver,
@@ -69,9 +70,17 @@ export class CategoryResolver {
     @Root() category: CategoryModel,
     @GqlUser() user: UserModel
   ): Promise<TransactionModel[]> {
-    const transactions = await this.transactionService.listTransactions(user.id)
-    return transactions.filter(
-      (transaction) => transaction.categoryId === category.id
+    return this.transactionService.listTransactionsByCategory(
+      category.id,
+      user.id
     )
+  }
+
+  @FieldResolver(() => Int)
+  async transactionsCount(
+    @Root() category: CategoryModel,
+    @GqlUser() user: UserModel
+  ): Promise<number> {
+    return this.transactionService.countByCategory(category.id, user.id)
   }
 }
