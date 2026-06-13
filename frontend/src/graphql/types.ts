@@ -87,6 +87,12 @@ export interface TransactionPeriod {
   year: number
 }
 
+export interface Overview {
+  balance: number
+  monthlyIncome: number
+  monthlyExpenses: number
+}
+
 export interface PaginatedTransactions {
   items: Transaction[]
   total: number

@@ -1,58 +1,59 @@
 import * as React from "react";
-import { ArrowDownCircle, ArrowUpCircle, Wallet } from "lucide-react";
-import { useTransactions } from "@/hooks/use-transactions";
+import { Link } from "react-router-dom";
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  ChevronRight,
+  Plus,
+  Wallet,
+} from "lucide-react";
+import {
+  useOverview,
+  useRecentTransactions,
+} from "@/hooks/use-transactions";
+import { useCategories } from "@/hooks/use-categories";
+import { CategoryIcon } from "@/components/category-icon";
+import { CategoryColor } from "@/components/category-color";
+import { TransactionDialog } from "@/components/transaction-dialog";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatDate } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { TransactionType } from "@/graphql/types";
 
 export function DashboardPage() {
-  const { data, isLoading } = useTransactions({
-    pageSize: 1000,
-  });
-  const transactions = data?.items ?? [];
+  const { data: overview, isLoading: isOverviewLoading } = useOverview();
+  const { data: recent = [], isLoading: isRecentLoading } =
+    useRecentTransactions(5);
+  const { data: categories = [], isLoading: isCategoriesLoading } =
+    useCategories();
 
-  const totals = React.useMemo(() => {
-    return transactions.reduce(
-      (acc, transaction) => {
-        if (transaction.type === TransactionType.INCOME) {
-          acc.income += transaction.amount;
-        } else {
-          acc.expense += transaction.amount;
-        }
-        return acc;
-      },
-      { income: 0, expense: 0 },
-    );
-  }, [transactions]);
-
-  const balance = totals.income - totals.expense;
+  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const stats = [
     {
       label: "Saldo total",
-      value: balance,
+      value: overview?.balance ?? 0,
       icon: Wallet,
       tone: "text-chart-3",
     },
     {
       label: "Receitas do mês",
-      value: totals.income,
+      value: overview?.monthlyIncome ?? 0,
       icon: ArrowUpCircle,
       tone: "text-success",
-      bg: "bg-success/10",
     },
     {
       label: "Despesas do mês",
-      value: totals.expense,
+      value: overview?.monthlyExpenses ?? 0,
       icon: ArrowDownCircle,
       tone: "text-destructive",
     },
   ];
 
   return (
-    <div>
+    <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {stats.map((stat) => (
           <Card key={stat.label}>
@@ -63,7 +64,7 @@ export function DashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {isLoading ? (
+              {isOverviewLoading ? (
                 <Skeleton className="h-8 w-32" />
               ) : (
                 <p className="text-2xl font-semibold">
@@ -74,7 +75,147 @@ export function DashboardPage() {
           </Card>
         ))}
       </div>
+
+      <div className="grid items-start gap-4 lg:grid-cols-2">
+        <Card className="gap-0">
+          <CardHeader className="flex-row items-center justify-between gap-3 border-b pb-4">
+            <CardTitle>Transações recentes</CardTitle>
+            <Link
+              to="/transactions"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              Ver todas
+              <ChevronRight className="size-4" />
+            </Link>
+          </CardHeader>
+          <CardContent className="divide-y">
+            {isRecentLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="py-4">
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ))
+            ) : recent.length === 0 ? (
+              <p className="py-4 text-sm text-muted-foreground">
+                Nenhuma transação recente.
+              </p>
+            ) : (
+              recent.map((transaction) => {
+                const isIncome = transaction.type === TransactionType.INCOME;
+                const TypeIcon = isIncome ? ArrowUpCircle : ArrowDownCircle;
+                return (
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between gap-3 py-4"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      {transaction.category ? (
+                        <CategoryIcon
+                          icon={transaction.category.icon}
+                          color={transaction.category.color}
+                        />
+                      ) : null}
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">
+                          {transaction.title}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDate(transaction.date)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-3">
+                      {transaction.category ? (
+                        <CategoryColor
+                          color={transaction.category.color}
+                          label={transaction.category.name}
+                        />
+                      ) : null}
+                      <span className="font-semibold">
+                        {formatCurrency(
+                          isIncome ? transaction.amount : -transaction.amount,
+                        )}
+                      </span>
+                      <TypeIcon
+                        className={cn(
+                          "size-4",
+                          isIncome ? "text-success" : "text-destructive",
+                        )}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
+
+            {!isRecentLoading ? (
+              <div className="pt-4">
+                <Button
+                  variant="ghost"
+                  className="w-full text-success hover:text-success"
+                  onClick={() => setDialogOpen(true)}
+                >
+                  <Plus className="size-4" />
+                  Nova transação
+                </Button>
+              </div>
+            ) : null}
+          </CardContent>
+        </Card>
+
+        <Card className="gap-0">
+          <CardHeader className="flex-row items-center justify-between gap-3 border-b pb-4">
+            <CardTitle>Categorias</CardTitle>
+            <Link
+              to="/categories"
+              className="flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              Gerenciar
+              <ChevronRight className="size-4" />
+            </Link>
+          </CardHeader>
+          <CardContent className="divide-y">
+            {isCategoriesLoading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <div key={index} className="py-4">
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ))
+            ) : categories.length === 0 ? (
+              <p className="py-4 text-sm text-muted-foreground">
+                Nenhuma categoria cadastrada.
+              </p>
+            ) : (
+              categories.map((category) => {
+                const count = category.transactionsCount ?? 0;
+                return (
+                  <div
+                    key={category.id}
+                    className="flex items-center justify-between gap-3 py-4"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <CategoryIcon
+                        icon={category.icon}
+                        color={category.color}
+                      />
+                      <p className="truncate font-medium">{category.name}</p>
+                    </div>
+                    <span className="shrink-0 text-sm text-muted-foreground">
+                      {count} {count === 1 ? "item" : "itens"}
+                    </span>
+                  </div>
+                );
+              })
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <TransactionDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        transaction={null}
+      />
     </div>
   );
 }
-

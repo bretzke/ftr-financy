@@ -7,6 +7,7 @@ import type {
   CreateTransactionInput,
   ListTransactionsInput,
   LoginInput,
+  Overview,
   PaginatedTransactions,
   RegisterInput,
   Transaction,
@@ -100,6 +101,25 @@ const LIST_TRANSACTIONS_QUERY = gql`
   }
 `
 
+const RECENT_TRANSACTIONS_QUERY = gql`
+  ${TRANSACTION_FIELDS}
+  query RecentTransactions($limit: Int) {
+    recentTransactions(limit: $limit) {
+      ...TransactionFields
+    }
+  }
+`
+
+const OVERVIEW_QUERY = gql`
+  query Overview {
+    overview {
+      balance
+      monthlyIncome
+      monthlyExpenses
+    }
+  }
+`
+
 const TRANSACTION_PERIODS_QUERY = gql`
   query TransactionPeriods {
     transactionPeriods {
@@ -184,6 +204,19 @@ export const api = {
         { params }
       )
       .then((res) => res.listTransactions)
+  },
+  getOverview() {
+    return graphqlClient
+      .request<{ overview: Overview }>(OVERVIEW_QUERY)
+      .then((res) => res.overview)
+  },
+  listRecentTransactions(limit?: number) {
+    return graphqlClient
+      .request<{ recentTransactions: Transaction[] }>(
+        RECENT_TRANSACTIONS_QUERY,
+        { limit }
+      )
+      .then((res) => res.recentTransactions)
   },
   listTransactionPeriods() {
     return graphqlClient

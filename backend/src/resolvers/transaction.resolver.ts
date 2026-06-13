@@ -1,6 +1,7 @@
 import {
   Arg,
   FieldResolver,
+  Int,
   Mutation,
   Query,
   Resolver,
@@ -19,6 +20,7 @@ import {
   PaginatedTransactions,
   TransactionPeriod,
 } from '../dtos/output/transaction.output'
+import { Overview } from '../dtos/output/overview.output'
 import { TransactionService } from '../services/transaction.service'
 import { CategoryService } from '../services/category.service'
 import { GqlUser } from '../graphql/decorators/user.decorator'
@@ -64,6 +66,19 @@ export class TransactionResolver {
     @GqlUser() user: UserModel
   ): Promise<PaginatedTransactions> {
     return this.transactionService.listTransactions(user.id, params)
+  }
+
+  @Query(() => Overview)
+  async overview(@GqlUser() user: UserModel): Promise<Overview> {
+    return this.transactionService.getOverview(user.id)
+  }
+
+  @Query(() => [TransactionModel])
+  async recentTransactions(
+    @Arg('limit', () => Int, { nullable: true }) limit: number,
+    @GqlUser() user: UserModel
+  ): Promise<TransactionModel[]> {
+    return this.transactionService.listRecentTransactions(user.id, limit ?? 5)
   }
 
   @Query(() => [TransactionPeriod])

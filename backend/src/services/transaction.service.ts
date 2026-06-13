@@ -117,6 +117,43 @@ export class TransactionService {
     };
   }
 
+  async getOverview(userId: string) {
+    const now = new Date();
+    const start = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1),
+    );
+    const end = new Date(
+      Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1),
+    );
+
+    const sumAmount = (where: Prisma.TransactionWhereInput) =>
+      prismaClient.transaction.aggregate({ _sum: { amount: true }, where });
+
+    const [incomeAll, expenseAll, incomeMonth, expenseMonth] =
+      await Promise.all([
+        sumAmount({ userId, type: TransactionType.INCOME }),
+        sumAmount({ userId, type: TransactionType.EXPENSE }),
+        sumAmount({
+          userId,
+          type: TransactionType.INCOME,
+          date: { gte: start, lt: end },
+        }),
+        sumAmount({
+          userId,
+          type: TransactionType.EXPENSE,
+          date: { gte: start, lt: end },
+        }),
+      ]);
+
+    const toNumber = (value: Prisma.Decimal | null) => value?.toNumber() ?? 0;
+
+    return {
+      balance: toNumber(incomeAll._sum.amount) - toNumber(expenseAll._sum.amount),
+      monthlyIncome: toNumber(incomeMonth._sum.amount),
+      monthlyExpenses: toNumber(expenseMonth._sum.amount),
+    };
+  }
+
   async listPeriods(userId: string) {
     const rows = await prismaClient.$queryRaw<
       { year: number; month: number }[]
@@ -139,6 +176,17 @@ export class TransactionService {
     return prismaClient.transaction.count({
       where: { userId, categoryId },
     });
+  }
+
+  async listRecentTransactions(userId: string, limit = 5) {
+    const take = Math.max(1, Math.trunc(limit));
+    const transactions = await prismaClient.transaction.findMany({
+      where: { userId },
+      orderBy: { createdAt: "desc" },
+      take,
+    });
+
+    return transactions.map((transaction) => this.mapTransaction(transaction));
   }
 
   async listTransactionsByCategory(categoryId: string, userId: string) {

@@ -99,6 +99,12 @@ type Mutation {
   updateTransaction(data: UpdateTransactionInput!, id: String!): TransactionModel!
 }
 
+type Overview {
+  balance: Float!
+  monthlyExpenses: Float!
+  monthlyIncome: Float!
+}
+
 type PaginatedTransactions {
   items: [TransactionModel!]!
   page: Int!
@@ -112,6 +118,8 @@ type Query {
   getTransaction(id: String!): TransactionModel!
   listCategories: [CategoryModel!]!
   listTransactions(params: ListTransactionsInput): PaginatedTransactions!
+  overview: Overview!
+  recentTransactions(limit: Int): [TransactionModel!]!
   transactionPeriods: [TransactionPeriod!]!
 }
 

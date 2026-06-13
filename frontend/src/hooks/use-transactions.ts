@@ -16,6 +16,9 @@ export const transactionKeys = {
   list: (params?: ListTransactionsInput) =>
     [...transactionKeys.all, "list", params ?? {}] as const,
   periods: () => [...transactionKeys.all, "periods"] as const,
+  overview: () => [...transactionKeys.all, "overview"] as const,
+  recent: (limit?: number) =>
+    [...transactionKeys.all, "recent", limit ?? 5] as const,
 };
 
 export function useTransactions(params?: ListTransactionsInput) {
@@ -30,6 +33,20 @@ export function useTransactionPeriods() {
   return useQuery({
     queryKey: transactionKeys.periods(),
     queryFn: () => api.listTransactionPeriods(),
+  });
+}
+
+export function useOverview() {
+  return useQuery({
+    queryKey: transactionKeys.overview(),
+    queryFn: () => api.getOverview(),
+  });
+}
+
+export function useRecentTransactions(limit?: number) {
+  return useQuery({
+    queryKey: transactionKeys.recent(limit),
+    queryFn: () => api.listRecentTransactions(limit),
   });
 }
 
