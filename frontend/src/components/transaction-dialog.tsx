@@ -1,15 +1,15 @@
-import * as React from 'react'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { toast } from 'sonner'
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
@@ -17,31 +17,32 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import {
   useCreateTransaction,
   useUpdateTransaction,
-} from '@/hooks/use-transactions'
-import { useCategories } from '@/hooks/use-categories'
-import { transactionSchema, type TransactionFormValues } from '@/lib/schemas'
-import { getErrorMessage } from '@/lib/error'
-import { toDateInputValue } from '@/lib/format'
-import { CategoryIcon } from '@/components/category-icon'
-import { TransactionType, type Transaction } from '@/graphql/types'
+} from "@/hooks/use-transactions";
+import { useCategories } from "@/hooks/use-categories";
+import { transactionSchema, type TransactionFormValues } from "@/lib/schemas";
+import { getErrorMessage } from "@/lib/error";
+import { toDateInputValue } from "@/lib/format";
+import { CategoryIcon } from "@/components/category-icon";
+import { cn } from "@/lib/utils";
+import { TransactionType, type Transaction } from "@/graphql/types";
 
 interface TransactionDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  transaction?: Transaction | null
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  transaction?: Transaction | null;
 }
 
 export function TransactionDialog({
@@ -49,24 +50,24 @@ export function TransactionDialog({
   onOpenChange,
   transaction,
 }: TransactionDialogProps) {
-  const isEditing = !!transaction
-  const { data: categories = [] } = useCategories()
-  const createTransaction = useCreateTransaction()
-  const updateTransaction = useUpdateTransaction()
+  const isEditing = !!transaction;
+  const { data: categories = [] } = useCategories();
+  const createTransaction = useCreateTransaction();
+  const updateTransaction = useUpdateTransaction();
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
-      title: '',
+      title: "",
       amount: undefined as unknown as number,
       type: TransactionType.EXPENSE,
       date: toDateInputValue(new Date()),
-      categoryId: '',
+      categoryId: "",
     },
-  })
+  });
 
   React.useEffect(() => {
-    if (!open) return
+    if (!open) return;
     if (transaction) {
       form.reset({
         title: transaction.title,
@@ -74,19 +75,19 @@ export function TransactionDialog({
         type: transaction.type,
         date: toDateInputValue(transaction.date),
         categoryId: transaction.categoryId,
-      })
+      });
     } else {
       form.reset({
-        title: '',
+        title: "",
         amount: undefined as unknown as number,
         type: TransactionType.EXPENSE,
         date: toDateInputValue(new Date()),
-        categoryId: '',
-      })
+        categoryId: "",
+      });
     }
-  }, [open, transaction, form])
+  }, [open, transaction, form]);
 
-  const isPending = createTransaction.isPending || updateTransaction.isPending
+  const isPending = createTransaction.isPending || updateTransaction.isPending;
 
   async function onSubmit(values: TransactionFormValues) {
     const payload = {
@@ -95,19 +96,22 @@ export function TransactionDialog({
       type: values.type,
       categoryId: values.categoryId,
       date: new Date(`${values.date}T00:00:00`).toISOString(),
-    }
+    };
 
     try {
       if (isEditing && transaction) {
-        await updateTransaction.mutateAsync({ id: transaction.id, data: payload })
-        toast.success('Transação atualizada com sucesso')
+        await updateTransaction.mutateAsync({
+          id: transaction.id,
+          data: payload,
+        });
+        toast.success("Transação atualizada com sucesso");
       } else {
-        await createTransaction.mutateAsync(payload)
-        toast.success('Transação criada com sucesso')
+        await createTransaction.mutateAsync(payload);
+        toast.success("Transação criada com sucesso");
       }
-      onOpenChange(false)
+      onOpenChange(false);
     } catch (error) {
-      toast.error(getErrorMessage(error))
+      toast.error(getErrorMessage(error));
     }
   }
 
@@ -116,10 +120,10 @@ export function TransactionDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? 'Editar transação' : 'Nova transação'}
+            {isEditing ? "Editar transação" : "Nova transação"}
           </DialogTitle>
           <DialogDescription>
-            Preencha os dados da transação abaixo.
+            Adicione uma nova movimentação financeira
           </DialogDescription>
         </DialogHeader>
 
@@ -131,78 +135,74 @@ export function TransactionDialog({
           >
             <FormField
               control={form.control}
-              name="title"
+              name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ex.: Salário, Mercado..." {...field} />
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => field.onChange(TransactionType.EXPENSE)}
+                        className={cn(
+                          "flex cursor-pointer items-center justify-center gap-2 rounded-lg border bg-background px-4 py-3 text-sm font-medium transition-colors",
+                          field.value === TransactionType.EXPENSE
+                            ? "border-destructive bg-muted/50 text-foreground"
+                            : "border-input text-muted-foreground hover:bg-muted/40",
+                        )}
+                      >
+                        <ArrowDownCircle
+                          className={cn(
+                            "size-4",
+                            field.value === TransactionType.EXPENSE
+                              ? "text-destructive"
+                              : "text-muted-foreground",
+                          )}
+                        />
+                        Despesa
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => field.onChange(TransactionType.INCOME)}
+                        className={cn(
+                          "flex cursor-pointer items-center justify-center gap-2 rounded-lg border bg-background px-4 py-3 text-sm font-medium transition-colors",
+                          field.value === TransactionType.INCOME
+                            ? "border-success bg-muted/50 text-foreground"
+                            : "border-input text-muted-foreground hover:bg-muted/40",
+                        )}
+                      >
+                        <ArrowUpCircle
+                          className={cn(
+                            "size-4",
+                            field.value === TransactionType.INCOME
+                              ? "text-success"
+                              : "text-muted-foreground",
+                          )}
+                        />
+                        Receita
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Valor</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="0,00"
-                        name={field.name}
-                        ref={field.ref}
-                        onBlur={field.onBlur}
-                        value={field.value ?? ''}
-                        onChange={(event) =>
-                          field.onChange(
-                            event.target.value === ''
-                              ? undefined
-                              : event.target.valueAsNumber
-                          )
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={TransactionType.INCOME}>
-                          Receita
-                        </SelectItem>
-                        <SelectItem value={TransactionType.EXPENSE}>
-                          Despesa
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Ex: Salário, Aluguel, Compras..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
@@ -221,61 +221,80 @@ export function TransactionDialog({
 
               <FormField
                 control={form.control}
-                name="categoryId"
+                name="amount"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Categoria</FormLabel>
-                    <Select
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categories.length === 0 ? (
-                          <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                            Crie uma categoria primeiro
-                          </div>
-                        ) : (
-                          categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              <span className="flex items-center gap-2">
-                                <CategoryIcon
-                                  icon={category.icon}
-                                  color={category.color}
-                                  size="sm"
-                                />
-                                {category.name}
-                              </span>
-                            </SelectItem>
-                          ))
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Valor (R$)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        placeholder="0,00"
+                        name={field.name}
+                        ref={field.ref}
+                        onBlur={field.onBlur}
+                        value={field.value ?? ""}
+                        onChange={(event) =>
+                          field.onChange(
+                            event.target.value === ""
+                              ? undefined
+                              : event.target.valueAsNumber,
+                          )
+                        }
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <DialogFooter className="mt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isEditing ? 'Salvar alterações' : 'Criar transação'}
-              </Button>
-            </DialogFooter>
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoria</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione uma categoria" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.length === 0 ? (
+                        <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                          Crie uma categoria primeiro
+                        </div>
+                      ) : (
+                        categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            <span className="flex items-center gap-2">
+                              <CategoryIcon
+                                icon={category.icon}
+                                color={category.color}
+                                size="sm"
+                              />
+                              {category.name}
+                            </span>
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="mt-2 w-full" disabled={isPending}>
+              {isEditing ? "Salvar alterações" : "Salvar transação"}
+            </Button>
           </form>
         </Form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
+

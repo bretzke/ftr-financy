@@ -43,6 +43,7 @@ type CategoryModel {
   name: String!
   transactions: [TransactionModel!]!
   transactionsCount: Int!
+  transactionsTotal: Float!
   updatedAt: DateTimeISO!
   userId: String!
 }
@@ -96,6 +97,7 @@ type Mutation {
   login(data: LoginInput!): LoginOutput!
   register(data: RegisterInput!): RegisterOutput!
   updateCategory(data: UpdateCategoryInput!, id: String!): CategoryModel!
+  updateProfile(data: UpdateProfileInput!): UserModel!
   updateTransaction(data: UpdateTransactionInput!, id: String!): TransactionModel!
 }
 
@@ -165,6 +167,10 @@ input UpdateCategoryInput {
   description: String
   icon: CategoryIcon
   name: String
+}
+
+input UpdateProfileInput {
+  name: String!
 }
 
 input UpdateTransactionInput {

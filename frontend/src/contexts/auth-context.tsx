@@ -9,6 +9,7 @@ interface AuthContextValue {
   isAuthenticated: boolean
   login: (data: LoginInput) => Promise<void>
   register: (data: RegisterInput) => Promise<void>
+  updateProfile: (name: string) => Promise<void>
   logout: () => void
 }
 
@@ -45,6 +46,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [persistSession]
   )
 
+  const updateProfile = React.useCallback(async (name: string) => {
+    const updatedUser = await api.updateProfile({ name })
+    userStorage.set(updatedUser)
+    setUser(updatedUser)
+  }, [])
+
   const logout = React.useCallback(() => {
     tokenStorage.clear()
     userStorage.clear()
@@ -58,9 +65,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: !!user,
       login,
       register,
+      updateProfile,
       logout,
     }),
-    [user, login, register, logout]
+    [user, login, register, updateProfile, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

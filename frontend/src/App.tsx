@@ -6,6 +6,7 @@ import { RegisterPage } from "@/pages/register";
 import { DashboardPage } from "@/pages/dashboard";
 import { TransactionsPage } from "@/pages/transactions";
 import { CategoriesPage } from "@/pages/categories";
+import { ProfilePage } from "@/pages/profile";
 import { AuthLayout } from "./components/layout/auth-layout";
 
 export function App() {
@@ -24,6 +25,7 @@ export function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/categories" element={<CategoriesPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
           </Route>
         </Route>
 

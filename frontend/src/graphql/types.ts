@@ -21,6 +21,7 @@ export interface Category {
   icon: string
   color: string
   transactionsCount?: number
+  transactionsTotal?: number
   userId: string
   createdAt: string
   updatedAt: string
@@ -54,6 +55,10 @@ export interface RegisterInput {
   name: string
   email: string
   password: string
+}
+
+export interface UpdateProfileInput {
+  name: string
 }
 
 export interface CreateTransactionInput {

@@ -12,6 +12,7 @@ import type {
   RegisterInput,
   Transaction,
   TransactionPeriod,
+  UpdateProfileInput,
   UpdateCategoryInput,
   UpdateTransactionInput,
 } from './types'
@@ -34,6 +35,7 @@ const CATEGORY_FIELDS = gql`
     icon
     color
     transactionsCount
+    transactionsTotal
     userId
     createdAt
     updatedAt
@@ -82,6 +84,15 @@ const REGISTER_MUTATION = gql`
       user {
         ...UserFields
       }
+    }
+  }
+`
+
+const UPDATE_PROFILE_MUTATION = gql`
+  ${USER_FIELDS}
+  mutation UpdateProfile($data: UpdateProfileInput!) {
+    updateProfile(data: $data) {
+      ...UserFields
     }
   }
 `
@@ -196,6 +207,13 @@ export const api = {
     return graphqlClient
       .request<{ register: AuthPayload }>(REGISTER_MUTATION, { data })
       .then((res) => res.register)
+  },
+  updateProfile(data: UpdateProfileInput) {
+    return graphqlClient
+      .request<{ updateProfile: AuthPayload['user'] }>(UPDATE_PROFILE_MUTATION, {
+        data,
+      })
+      .then((res) => res.updateProfile)
   },
   listTransactions(params?: ListTransactionsInput) {
     return graphqlClient

@@ -1,6 +1,6 @@
 import { UserModel } from "../models/user.model";
 import { prismaClient } from "../../prisma/prisma";
-import { LoginInput, RegisterInput } from "../dtos/input/auth.input";
+import { LoginInput, RegisterInput, UpdateProfileInput } from "../dtos/input/auth.input";
 import { comparePassword, hashPassword } from "../utils/hash";
 import { signJwt } from "../utils/jwt";
 import {
@@ -50,6 +50,17 @@ export class AuthService {
       },
     });
     return this.generateTokens(user);
+  }
+
+  async updateProfile(userId: string, data: UpdateProfileInput) {
+    const name = assertMinLength(assertNotEmpty(data.name, "name"), 2, "name");
+
+    const user = await prismaClient.user.update({
+      where: { id: userId },
+      data: { name },
+    });
+
+    return user;
   }
 
   generateTokens(user: UserModel) {

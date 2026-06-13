@@ -178,6 +178,15 @@ export class TransactionService {
     });
   }
 
+  async totalByCategory(categoryId: string, userId: string) {
+    const result = await prismaClient.transaction.aggregate({
+      _sum: { amount: true },
+      where: { userId, categoryId },
+    });
+
+    return result._sum.amount?.toNumber() ?? 0;
+  }
+
   async listRecentTransactions(userId: string, limit = 5) {
     const take = Math.max(1, Math.trunc(limit));
     const transactions = await prismaClient.transaction.findMany({

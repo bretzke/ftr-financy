@@ -1,6 +1,7 @@
 import {
   Arg,
   FieldResolver,
+  Float,
   Int,
   Mutation,
   Query,
@@ -82,5 +83,13 @@ export class CategoryResolver {
     @GqlUser() user: UserModel
   ): Promise<number> {
     return this.transactionService.countByCategory(category.id, user.id)
+  }
+
+  @FieldResolver(() => Float)
+  async transactionsTotal(
+    @Root() category: CategoryModel,
+    @GqlUser() user: UserModel
+  ): Promise<number> {
+    return this.transactionService.totalByCategory(category.id, user.id)
   }
 }

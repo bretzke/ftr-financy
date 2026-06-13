@@ -7,10 +7,7 @@ import {
   Plus,
   Wallet,
 } from "lucide-react";
-import {
-  useOverview,
-  useRecentTransactions,
-} from "@/hooks/use-transactions";
+import { useOverview, useRecentTransactions } from "@/hooks/use-transactions";
 import { useCategories } from "@/hooks/use-categories";
 import { CategoryIcon } from "@/components/category-icon";
 import { CategoryColor } from "@/components/category-color";
@@ -132,8 +129,9 @@ export function DashboardPage() {
                         />
                       ) : null}
                       <span className="font-semibold">
+                        {isIncome ? "+ " : "- "}
                         {formatCurrency(
-                          isIncome ? transaction.amount : -transaction.amount,
+                          isIncome ? transaction.amount : transaction.amount,
                         )}
                       </span>
                       <TypeIcon
@@ -188,6 +186,7 @@ export function DashboardPage() {
             ) : (
               categories.map((category) => {
                 const count = category.transactionsCount ?? 0;
+                const total = category.transactionsTotal ?? 0;
                 return (
                   <div
                     key={category.id}
@@ -200,9 +199,12 @@ export function DashboardPage() {
                       />
                       <p className="truncate font-medium">{category.name}</p>
                     </div>
-                    <span className="shrink-0 text-sm text-muted-foreground">
-                      {count} {count === 1 ? "item" : "itens"}
-                    </span>
+                    <div className="shrink-0 text-right">
+                      <p className="font-semibold">{formatCurrency(total)}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {count} {count === 1 ? "item" : "itens"}
+                      </p>
+                    </div>
                   </div>
                 );
               })
@@ -219,3 +221,4 @@ export function DashboardPage() {
     </div>
   );
 }
+

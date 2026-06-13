@@ -32,8 +32,14 @@ export const categorySchema = z.object({
   color: z.enum(CATEGORY_COLORS, { message: "Selecione uma cor" }),
 });
 
+export const profileSchema = z.object({
+  name: z.string().min(2, "Informe seu nome completo"),
+  email: z.string().email("E-mail inválido"),
+});
+
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type RegisterFormValues = z.infer<typeof registerSchema>;
 export type TransactionFormValues = z.infer<typeof transactionSchema>;
 export type CategoryFormValues = z.infer<typeof categorySchema>;
+export type ProfileFormValues = z.infer<typeof profileSchema>;
 
