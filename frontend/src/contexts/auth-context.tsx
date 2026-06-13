@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { api } from '@/graphql/operations'
 import { tokenStorage, userStorage } from '@/lib/storage'
+import { isTokenValid } from '@/lib/jwt'
 import { queryClient } from '@/lib/query-client'
 import type { LoginInput, RegisterInput, User } from '@/graphql/types'
 
@@ -18,7 +19,12 @@ const AuthContext = React.createContext<AuthContextValue | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = React.useState<User | null>(() => {
     const token = tokenStorage.get()
-    return token ? userStorage.get() : null
+    if (!isTokenValid(token)) {
+      tokenStorage.clear()
+      userStorage.clear()
+      return null
+    }
+    return userStorage.get()
   })
 
   const persistSession = React.useCallback(
@@ -58,6 +64,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
     queryClient.clear()
   }, [])
+
+  React.useEffect(() => {
+    if (!user) return
+
+    function checkToken() {
+      if (!isTokenValid(tokenStorage.get())) {
+        logout()
+      }
+    }
+
+    const interval = window.setInterval(checkToken, 60_000)
+    window.addEventListener('focus', checkToken)
+
+    return () => {
+      window.clearInterval(interval)
+      window.removeEventListener('focus', checkToken)
+    }
+  }, [user, logout])
 
   const value = React.useMemo<AuthContextValue>(
     () => ({
